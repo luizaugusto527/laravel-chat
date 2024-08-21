@@ -1134,7 +1134,16 @@ button {
 .spinner-border {
     --bs-spinner-border-width: 2px;
 }
+.img-fluid.profile-img-preview {
+    height: 135px;
+    width: 135px;
+    object-fit: cover;
+}
 
+.profile-file {
+    height: 150px;
+    width: 150px;
+}
 /*================================
     Chatting Application End
 ================================*/
