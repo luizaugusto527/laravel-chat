@@ -3,17 +3,17 @@ aria-hidden="true">
 <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
         <div class="modal-body">
-            <form action="#" class="profile-form">
+            <form action="#" class="profile-form" enctype="multipart/form-data">
                 @csrf
                 <div class="file profile-file">
-                    <img src="{{auth()->user()->avatar}}" alt="Upload" class="img-fluid profile-img-preview">
+                    <img src="{{ asset(auth()->user()->avatar) }}" alt="Upload" class="img-fluid profile-image-preview">
                     <label for="select_file"><i class="fal fa-camera-alt"></i></label>
-                    <input id="select_file" type="file" hidden>
+                    <input id="select_file" type="file" hidden name="avatar">
                 </div>
                 <p>Edit information</p>
-                <input type="text" placeholder="Name" value="{{auth()->user()->name}}" name="name">
-                <input type="text" placeholder="User Name" value="{{auth()->user()->user_name}}" name="user_name">
-                <input type="email" placeholder="E-mail" value="{{auth()->user()->email}}" name="email">
+                <input type="text" placeholder="Name" value="{{ auth()->user()->name }}" name="name">
+                <input type="text" placeholder="User Id" value="{{ auth()->user()->user_name }}" name="user_id">
+                <input type="email" placeholder="Email" value="{{ auth()->user()->email }}" name="email">
                 <p>Change password</p>
                 <div class="row">
                     <div class="col-xl-6">
@@ -29,7 +29,7 @@ aria-hidden="true">
                 <div class="modal-footer p-0 mt-3">
                     <button type="button" class="btn btn-secondary cancel"
                         data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary save">Save changes</button>
+                    <button type="submit" class="btn btn-primary save profile-save">Save changes</button>
                 </div>
             </form>
         </div>
@@ -37,27 +37,41 @@ aria-hidden="true">
     </div>
 </div>
 </div>
-
 @push('scripts')
-
 <script>
-    $(document).ready(function (){
-        $('.profile-form').on('submit',function (e) {
+    $(document).ready(function() {
+        $('.profile-form').on('submit', function(e){
             e.preventDefault();
-            let formData = $(this).serialize();
+            let saveBtn = $('.profile-save');
+            let formData = new FormData(this);
             $.ajax({
-                method:'POST',
-                url:'{{route("profile.update")}}',
-                data:formData,
-                sucess: function (data) {
-
+                method: 'POST',
+                url: '{{ route("profile.update") }}',
+                data: formData,
+                processData: false,
+                contentType: false,
+                beforeSend: function() {
+                    saveBtn.text('saving...');
+                    saveBtn.prop("disabled", true);
                 },
-                error: function (xhr,status,error) {
-                    console.log(xhr);
+                success: function(data) {
+                    window.location.reload();
+                },
+                error: function(xhr, status, error) {
+                    console.log(xhr)
+                    let errors = xhr.responseJSON.errors;
+
+                    $.each(errors, function(index, value) {
+                        notyf.error(value[0]);
+                    })
+
+                    saveBtn.text('Save changes');
+                    saveBtn.prop("disabled", false);
+
                 }
             })
+
         })
     })
 </script>
-
 @endpush
